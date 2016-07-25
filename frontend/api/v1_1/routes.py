@@ -56,3 +56,6 @@ def define_routes(application):
                       callback=files.add_tag)
     application.route("/files/<sha256>/tags/<tagid>/remove",
                       callback=files.remove_tag)
+    # download routes
+    application.route("/dl",
+                      callback=download.get_archive)
