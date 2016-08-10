@@ -17,6 +17,7 @@
 import logging
 import zipfile
 import StringIO
+import datetime
 from bottle import response, request
 
 from frontend.api.v1_1.errors import process_error
@@ -85,6 +86,13 @@ def get_archive(db):
         # https://github.com/mitsuhiko/flask-sqlalchemy/blob/master/flask_sqlalchemy/__init__.py#L422
         items = base_query.limit(limit).offset(offset).all()
 
+	# get file basic information
+	file_web_schema = FileWebSchema_v1_1(exclude=('probe_results','file_infos'))
+	infos = file_web_schema.dump(items, many=True).data
+
+
+	
+
         sha256_list = []
 
         for i, val in enumerate(items):            
@@ -94,7 +102,7 @@ def get_archive(db):
             #file_web.file.sha256
         
         if sha256_list is not None:
-            return _download_zip(sha256_list,db)
+            return _download_zip(sha256_list,db,infos)
         
     except Exception as e:
         log.exception(e)
@@ -104,7 +112,7 @@ def get_archive(db):
 
 
 # called by get_archive
-def _download_zip(hash_list, db):
+def _download_zip(hash_list, db, infos):
     
     s = StringIO.StringIO()
 
@@ -121,6 +129,20 @@ def _download_zip(hash_list, db):
         # Add file to archive
         zf.write(fobj.path,fobj.sha256)
 
+    for val in infos:
+
+	# Timestamp to readable date
+	scan_date = str(datetime.datetime.fromtimestamp(val['scan_date']))
+	val['scan_date']= scan_date
+
+	content = str(val)
+	name = val['file_sha256']+".info"
+	#log.debug('debug :: download_zip :: content = %s', content)
+	
+	# Write file info in zip archive
+	zf.writestr(name,content)
+
+	
 
     ctype = 'application/zip'
     # Suggest Filename to "irma_archive"
