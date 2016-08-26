@@ -49,6 +49,8 @@
         <li class="{{(state.location=='scan')?'active':''}}">Scan</li>
         <li>|</li>
         <li class="{{(state.location=='search')?'active':''}}"><a href="/search">Search</a></li>
+	<li>|</li>
+        <li class="{{(state.location=='stats')?'active':''}}"><a href="/stats">Statistics</a></li>
       </ul>
 
       <div class="spinner main" ng-if="state.settings.loading">
@@ -80,6 +82,8 @@
     <script src="/components/angular-moment/angular-moment.js"></script>
     <script src="/components/ng-table/ng-table.js"></script>
     <script src="/components/angular-svg-round-progressbar/build/roundProgress.js"></script>
+    <script src="/components/chart.js/dist/Chart.min.js"></script>
+    <script src="/components/angular-chart.js/dist/angular-chart.min.js"></script>
     <!-- endbuild -->
 
     <!-- build:js /scripts/combined.js -->
@@ -92,6 +96,7 @@
     <script src="/scripts/controllers/results.js"></script>
     <script src="/scripts/controllers/details.js"></script>
     <script src="/scripts/controllers/maintenance.js"></script>
+    <script src="/scripts/controllers/stats.js"></script>
     <script src="/scripts/directives/alerts.js"></script>
     <script src="/scripts/directives/fileTrigger.js"></script>
     <script src="/scripts/directives/booleanDisplay.js"></script>

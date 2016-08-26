@@ -1,0 +1,17 @@
+<div id="stats" ng-app="irma">
+    <h2> Antivirus detection statistics</h2>
+
+    <div class="row" id="stats">
+        <table ng-table="vm.tableParams" class="table table-bordered">
+            <tr ng-repeat="item in avstats">
+                <td data-title="'AntivirusName'">{{item.name}}</td>
+                <td data-title="'Analyzed'">{{item.total}}</td>
+                <td data-title="'Infected'">{{item.infected}}</td>
+                <td data-title="'Clean'">{{item.clean}}</td>
+                <td data-title="'Errors'">{{item.errors}}</td>
+                <td data-title="'Graph'"><canvas id="doughnut1" class="chart chart-doughnut" chart-data="item.data" chart-labels="labels">  </canvas></td>
+            </tr>
+        </table>
+    </div>
+
+</div>

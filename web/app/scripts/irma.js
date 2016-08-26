@@ -12,6 +12,7 @@ angular.module('irma', [
   'angularMoment',
   'ngTable',
   'ngTagsInput',
+  'chart.js',
   'angular-svg-round-progress'
 ])
   .constant('constants', {
@@ -74,6 +75,15 @@ angular.module('irma', [
         controller: 'SearchCtrl',
         controllerAs: 'vm',
         location: 'search',
+        resolve: {
+          maintenance: ['state', function(state){ return state.pingApi();}]
+        }
+      })
+      .when('/stats', {
+        templateUrl: '/views/stats.html',
+        controller: 'StatsCtrl',
+        controllerAs: 'vm',
+        location: 'stats',
         resolve: {
           maintenance: ['state', function(state){ return state.pingApi();}]
         }
