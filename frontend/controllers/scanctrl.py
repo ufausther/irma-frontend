@@ -21,7 +21,7 @@ from lib.irma.common.exceptions import IrmaDatabaseResultNotFound, \
 import frontend.controllers.braintasks as celery_brain
 import frontend.controllers.ftpctrl as ftp_ctrl
 from frontend.helpers.sessions import session_transaction
-from frontend.models.sqlobjects import Scan, File, FileWeb, ProbeResult
+from frontend.models.sqlobjects import Scan, File, FileWeb, ProbeResult, Tag
 from lib.common.mimetypes import Magic
 from lib.irma.common.utils import IrmaScanRequest
 from frontend.controllers import braintasks
@@ -38,6 +38,17 @@ interprocess_lock_path = get_lock_path()
 # ===================
 #  Internals helpers
 # ===================
+
+def get_tagid(session, text):
+	tag_list = Tag.query_find_all(session)
+	
+	for tag in tag_list:
+		if tag.text == text:
+			log.debug("get_tagid :: tag [%s] found with id %d", text, id)
+			return tag.id
+
+	log.debug("get_tagid :: tag [%s] not found!", text)
+	return 0
 
 
 def _new_file(fileobj, session):
@@ -62,11 +73,24 @@ def _new_file(fileobj, session):
         # magic only deal with buffer
         # feed it with a 4MB buffer
         mimetype = magic.from_buffer(fileobj.read(2 ** 22))
+	
+	# Create a tag with mimetype as text
+	tag = Tag(mimetype)
+	session.add(tag)
+	log.debug("_new_file :: adding tag [%s]",mimetype)
+
         size = save_to_file(fileobj, path)
         log.debug("not present, saving, sha256 %s sha1 %s"
                   "md5 %s size %s mimetype: %s",
                   sha256, sha1, md5, size, mimetype)
         file = File(sha256, sha1, md5, size, mimetype, path, time, time)
+
+	tag_id = get_tagid(session,tag.text)
+	if tag_id != 0:
+		log.debug("_new_file :: applying tag [%s] to the file", tag.text)
+		file.add_tag(tag_id,session)
+	
+
         session.add(file)
     return file
 
