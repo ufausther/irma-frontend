@@ -51,6 +51,39 @@ def get_tagid(session, text):
 	return 0
 
 
+
+def set_probe_tag(file_hash, probe, result):
+
+    #log.debug("set_probe_tag :: probe = %s", probe)
+    #log.debug("set_probe_tag :: result = %s", result)
+
+    # If the probe is an antivirus and the results is "1" as infected
+    if result['type'] == 'antivirus' and result['status'] == 1 :
+
+        with session_transaction() as session:
+            available_tags = Tag.query_find_all(session)
+            if probe in [t.text for t in available_tags]:
+                log.debug("debug :: set_probe_tag :: tag [%s] already exists", probe)
+            else:
+                # create tag for the probe.
+                log.debug("debug :: set_probe_tag :: adding tag [%s] to database", probe)
+                tag = Tag(probe)
+                session.add(tag)
+                session.commit()
+
+            # add tag to file.
+            log.debug("debug :: set_probe_tag :: tagging file [%s] with tag [%s]",file_hash, probe)
+            file = File.load_from_sha256(file_hash, session)
+
+            tag_id = get_tagid(session, probe)
+            if tag_id != 0 :
+                file.add_tag(tag_id,session)
+                session.commit()
+
+
+    return 0
+
+
 def _new_file(fileobj, session):
     sha256 = sha256sum(fileobj)
     # split files between subdirs
